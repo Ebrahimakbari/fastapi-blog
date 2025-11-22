@@ -5,12 +5,13 @@ from db import get_db, create_table
 from contextlib import asynccontextmanager
 from router import router
 
-app = FastAPI()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_table()
+    await create_table()
     yield
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(router)

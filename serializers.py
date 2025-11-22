@@ -39,7 +39,7 @@ class PostUpdate(PostBase):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
-    posts: list[PostResponse] = []
+    posts: list[PostResponse] = None
     is_active: bool
     
     class Config:

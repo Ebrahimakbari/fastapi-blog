@@ -1,7 +1,7 @@
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from .models import User, Post
-from .serializers import UserCreate, UserResponse, PostCreate, PostResponse, PostUpdate
+from models import User, Post
+from serializers import UserCreate, UserResponse, PostCreate, PostResponse, PostUpdate
 from typing import Optional
 from pydantic import EmailStr
 
@@ -22,13 +22,15 @@ class UserCrud:
     async def create_user(db: AsyncSession, user:UserCreate):
         db_user = User(
             email=user.email,
-            hashed_password=user.password
+            hashed_password=user.password,
+            posts = []
         )
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
         return db_user
 
+        
 
 class PostCrud:
     

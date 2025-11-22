@@ -1,30 +1,32 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
-
+from sqlalchemy.orm import DeclarativeBase,sessionmaker
+from sqlalchemy import text
 
 
 class Base(DeclarativeBase):
     pass
 
+db_name = "blogdb"
 
-DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost/blogdb"
+DATABASE_URL = "postgresql+asyncpg://ebrahim:ebrahimpsql@localhost/blogdb"
 
-engin = create_async_engine(url=DATABASE_URL, echo=True)
+engine = create_async_engine(url=DATABASE_URL, echo=True)
 
-Session = async_sessionmaker(
-    bind=engin,
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
     autoflush=False,
     class_=AsyncSession
 )
 
 async def get_db():
-    async with Session as session:
+    async with AsyncSessionLocal() as session:
         try:
-            yield session()
+            yield session
         finally:
             await session.close()
 
 
 async def create_table():
-    async with engin.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        

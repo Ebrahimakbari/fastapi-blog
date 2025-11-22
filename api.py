@@ -1,8 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from serializers import UserCreate, UserResponse, PostCreate, PostResponse, PostUpdate
 from crud import PostCrud, UserCrud
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Body
 from db import get_db
+from pydantic import EmailStr
 
 
 
@@ -24,3 +25,73 @@ async def create_post_api(post: PostCreate, user_id:int, db:AsyncSession = Depen
         )
     new_post = await PostCrud.create_post(db, post, user_id)
     return new_post
+
+
+async def get_user_by_email_api(user_email:EmailStr = Body(...), db:AsyncSession = Depends(get_db)):
+    user = await UserCrud.get_user_by_email(db, user_email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="no user found with given email"
+        )
+    return user
+
+
+async def get_user_by_id_api(id:int, db:AsyncSession = Depends(get_db)):
+    user = await UserCrud.get_user_by_id(db, id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="no user found with given user id"
+        )
+    return user
+
+
+async def get_post_api(post_id:int, db:AsyncSession = Depends(get_db)):
+    post = await PostCrud.get_post(db, post_id)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="no post found with post id"
+        )
+    return post
+
+
+async def get_posts_api(skip:int = 0, limit:int = 10, db:AsyncSession = Depends(get_db)):
+    posts = await PostCrud.get_posts(db, skip, limit)
+    if not posts:
+        return []
+    return posts
+
+
+async def update_post_api(post_id:int, post:PostUpdate, db:AsyncSession = Depends(get_db)):
+    post = await PostCrud.update_post(db, post_id, post)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='no post with given id'
+        )
+    return post
+
+
+async def delete_post_api(post_id:int, db:AsyncSession = Depends(get_db)):
+    post = await PostCrud.delete_post_api(db, post_id)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail='no post found with given id'
+        )
+    return {
+        'message': 'ok'
+    }
+
+
+async def get_user_post_api(user_id:int, db:AsyncSession = Depends(get_db)):
+    user = await UserCrud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail='no user found with given id'
+        )
+    user_posts = PostCrud.get_user_posts(db, user_id)
+    return user_posts
