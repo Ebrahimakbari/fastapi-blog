@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 
@@ -7,10 +7,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password:str
-
-
-    
+    hashed_password:str = Field(..., alias="password")
 
 
 class PostBase(BaseModel):
@@ -30,7 +27,7 @@ class PostResponse(BaseModel):
     updated_at: Optional[datetime] = None
     
     class Config:
-        from_attribute = True
+        from_attributes = True
 
 
 class PostUpdate(PostBase):
@@ -39,8 +36,8 @@ class PostUpdate(PostBase):
 class UserResponse(BaseModel):
     id: int
     email: EmailStr
-    posts: list[PostResponse] = None
+    posts: Optional[list[PostResponse]] = None
     is_active: bool
     
     class Config:
-        from_attribute = True
+        from_attributes = True

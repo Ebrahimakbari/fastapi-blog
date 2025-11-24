@@ -27,7 +27,7 @@ async def create_post_api(post: PostCreate, user_id:int, db:AsyncSession = Depen
     return new_post
 
 
-async def get_user_by_email_api(user_email:EmailStr = Body(...), db:AsyncSession = Depends(get_db)):
+async def get_user_by_email_api(user_email:EmailStr , db:AsyncSession = Depends(get_db)):
     user = await UserCrud.get_user_by_email(db, user_email)
     if not user:
         raise HTTPException(
@@ -41,7 +41,7 @@ async def get_user_by_id_api(id:int, db:AsyncSession = Depends(get_db)):
     user = await UserCrud.get_user_by_id(db, id)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="no user found with given user id"
         )
     return user
@@ -57,7 +57,7 @@ async def get_post_api(post_id:int, db:AsyncSession = Depends(get_db)):
     return post
 
 
-async def get_posts_api(skip:int = 0, limit:int = 10, db:AsyncSession = Depends(get_db)):
+async def get_posts_api(skip:int = 0, limit:int = 10, db:AsyncSession = Depends(get_db)) -> list[PostResponse]:
     posts = await PostCrud.get_posts(db, skip, limit)
     if not posts:
         return []
@@ -75,7 +75,7 @@ async def update_post_api(post_id:int, post:PostUpdate, db:AsyncSession = Depend
 
 
 async def delete_post_api(post_id:int, db:AsyncSession = Depends(get_db)):
-    post = await PostCrud.delete_post_api(db, post_id)
+    post = await PostCrud.delete_post(db, post_id)
     if not post:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
@@ -93,5 +93,5 @@ async def get_user_post_api(user_id:int, db:AsyncSession = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail='no user found with given id'
         )
-    user_posts = PostCrud.get_user_posts(db, user_id)
+    user_posts = await PostCrud.get_user_posts(db, user_id)
     return user_posts

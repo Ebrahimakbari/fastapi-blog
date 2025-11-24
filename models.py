@@ -13,7 +13,7 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     
-    posts = relationship("Post", back_populates='owner', cascade='all, delete-orphan')
+    posts = relationship("Post", back_populates='owner', cascade='all, delete-orphan', lazy="selectin")
 
 
 class Post(Base):
